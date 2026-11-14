@@ -41,13 +41,13 @@ const voiceStart=s.indexOf('2) FULL HINDI VOICEOVER SCRIPT');
 const visualStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 if(voiceStart!==-1&&visualStart>voiceStart){
 let voice=s.slice(voiceStart,visualStart);
-const re=/\\[(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2}) \\| ([^\\]]+)\\]/g;
+const re=/\[(\d{1,2}:\d{2})–(\d{1,2}:\d{2}) \| ([^\]]+)\]/g;
 const matches=[...voice.matchAll(re)];
 const sections=[];
 for(let i=0;i<matches.length;i++){
 const m=matches[i], start=m.index+m[0].length, end=i+1<matches.length?matches[i+1].index:voice.length;
 const body=voice.slice(start,end);
-const words=(body.match(/[\\p{L}\\p{N}]+(?:['’.-][\\p{L}\\p{N}]+)*/gu)||[]).length;
+const words=(body.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length;
 sections.push({match:m,words});
 }
 const totalWords=sections.reduce((n,x)=>n+x.words,0);
@@ -66,15 +66,15 @@ cursor=m.index+m[0].length;
 rebuilt+=voice.slice(cursor);
 s=s.slice(0,voiceStart)+rebuilt+s.slice(visualStart);
 const actualMin=(totalSeconds/60).toFixed(1);
-s=s.replace(/Target length: [^\\n]+/,'Requested length: '+duration+'\\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)');
-s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover timestamps are estimated from the actual script word count at '+wpm+' words per minute. Read aloud once and adjust pauses.\\n\\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
+s=s.replace(/Target length: [^\n]+/,'Requested length: '+duration+'\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)');
+s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover timestamps are estimated from the actual script word count at '+wpm+' words per minute. Read aloud once and adjust pauses.\n\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 const sceneStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 const editStart=s.indexOf('4) EDITING, MUSIC & SFX',sceneStart);
 if(sceneStart!==-1&&editStart>sceneStart){
 let scene=s.slice(sceneStart,editStart);
 const scale=totalSeconds/315;
 const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
-scene=scene.replace(/(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2})/g,(all,a,b)=>{
+scene=scene.replace(/(\d{1,2}:\d{2})–(\d{1,2}:\d{2})/g,(all,a,b)=>{
 const sec=x=>{const p=x.split(':').map(Number);return p[0]*60+p[1]};
 return fmt(Math.round(sec(a)*scale))+'–'+fmt(Math.round(sec(b)*scale));
 });
