@@ -60,9 +60,16 @@ const ratio=Math.min(1,targetWords/Math.max(1,totalBefore));
 function countWords(t){return (t.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length}
 function fitWords(text,budget){
 if(countWords(text)<=budget)return text;
+const sentences=text.match(/[^.!?।]+[.!?।]?/gu)||[text];
+const kept=[];let used=0;
+for(const sentence of sentences){
+const n=countWords(sentence);
+if(used+n>budget)break;
+kept.push(sentence.trim());used+=n;
+}
+if(kept.length)return kept.join(' ');
 const tokens=text.match(/\S+/g)||[];
-let out=tokens.slice(0,budget).join(' ');
-return out.replace(/[,:;—-]+$/,'')+'…';
+return tokens.slice(0,budget).join(' ').replace(/[,:;—-]+$/,'')+'…';
 }
 let cursor=0,rebuilt='',elapsed=0;
 const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
