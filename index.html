@@ -42,25 +42,25 @@ const visualStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 if(voiceStart!==-1&&visualStart>voiceStart){
 let voice=s.slice(voiceStart,visualStart);
 const requestedDuration=val('duration')||'5 minutes';
-const durationMatch=requestedDuration.match(/\\d+(?:\\.\\d+)?/);
+const durationMatch=requestedDuration.match(/\d+(?:\.\d+)?/);
 const targetMinutes=durationMatch?Math.max(1,Math.min(60,Number(durationMatch[0]))):5;
 const wpm=130;
 const targetWords=Math.round(targetMinutes*wpm);
-const re=/\\[(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2}) \\| ([^\\]]+)\\]/g;
+const re=/\[(\d{1,2}:\d{2})–(\d{1,2}:\d{2}) \| ([^\]]+)\]/g;
 const matches=[...voice.matchAll(re)];
 const sections=[];
 for(let i=0;i<matches.length;i++){
 const m=matches[i],bodyStart=m.index+m[0].length,bodyEnd=i+1<matches.length?matches[i+1].index:voice.length;
 const body=voice.slice(bodyStart,bodyEnd).trim();
-const words=(body.match(/[\\p{L}\\p{N}]+(?:['’.-][\\p{L}\\p{N}]+)*/gu)||[]).length;
+const words=(body.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length;
 sections.push({match:m,body,words});
 }
 const totalBefore=sections.reduce((n,x)=>n+x.words,0);
 const ratio=Math.min(1,targetWords/Math.max(1,totalBefore));
-function countWords(t){return (t.match(/[\\p{L}\\p{N}]+(?:['’.-][\\p{L}\\p{N}]+)*/gu)||[]).length}
+function countWords(t){return (t.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length}
 function fitWords(text,budget){
 if(countWords(text)<=budget)return text;
-const tokens=text.match(/\\S+/g)||[];
+const tokens=text.match(/\S+/g)||[];
 let out=tokens.slice(0,budget).join(' ');
 return out.replace(/[,:;—-]+$/,'')+'…';
 }
@@ -74,7 +74,7 @@ const words=countWords(body);
 item.finalWords=words;
 const startSec=elapsed;
 elapsed+=Math.max(1,Math.round(words/wpm*60));
-rebuilt+=voice.slice(cursor,m.index)+'['+fmt(startSec)+'–'+fmt(elapsed)+' | '+m[3]+']\\n'+body+'\\n\\n';
+rebuilt+=voice.slice(cursor,m.index)+'['+fmt(startSec)+'–'+fmt(elapsed)+' | '+m[3]+']\n'+body+'\n\n';
 cursor=m.index+m[0].length+(item.body.length);
 }
 if(sections.length){
@@ -87,22 +87,22 @@ elapsed=0;
 for(let i=0;i<sections.length;i++){
 const item=sections[i],startSec=elapsed;
 elapsed+=Math.max(1,Math.round(item.finalWords/wpm*60));
-rebuilt+='['+fmt(startSec)+'–'+fmt(elapsed)+' | '+item.match[3]+']\\n'+fitWords(item.body,item.finalWords)+'\\n\\n';
+rebuilt+='['+fmt(startSec)+'–'+fmt(elapsed)+' | '+item.match[3]+']\n'+fitWords(item.body,item.finalWords)+'\n\n';
 }
 }
 }
 const totalWords=sections.reduce((n,x)=>n+x.finalWords,0);
 const totalSeconds=Math.max(1,Math.round(totalWords/wpm*60));
-s=s.slice(0,voiceStart)+rebuilt+'\\n'+s.slice(visualStart);
+s=s.slice(0,voiceStart)+rebuilt+'\n'+s.slice(visualStart);
 const actualMin=(totalSeconds/60).toFixed(1);
-s=s.replace(/Target length: [^\\n]+/,'Requested length: '+requestedDuration+'\\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)'+(Math.abs(Number(actualMin)-targetMinutes)>0.3?'\\nLENGTH NOTE: Read aloud and adjust pauses; this is an estimated duration.':''));
-s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover is sized to the requested word budget at '+wpm+' words per minute. Read aloud once and adjust pauses.\\n\\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
+s=s.replace(/Target length: [^\n]+/,'Requested length: '+requestedDuration+'\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)'+(Math.abs(Number(actualMin)-targetMinutes)>0.3?'\nLENGTH NOTE: Read aloud and adjust pauses; this is an estimated duration.':''));
+s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover is sized to the requested word budget at '+wpm+' words per minute. Read aloud once and adjust pauses.\n\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 const sceneStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
 const editStart=s.indexOf('4) EDITING, MUSIC & SFX',sceneStart);
 if(sceneStart!==-1&&editStart>sceneStart){
 let scene=s.slice(sceneStart,editStart);
 const scale=totalSeconds/315;
-scene=scene.replace(/(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2})/g,(all,a,b)=>{
+scene=scene.replace(/(\d{1,2}:\d{2})–(\d{1,2}:\d{2})/g,(all,a,b)=>{
 const sec=x=>{const p=x.split(':').map(Number);return p[0]*60+p[1]};
 return fmt(Math.round(sec(a)*scale))+'–'+fmt(Math.round(sec(b)*scale));
 });
