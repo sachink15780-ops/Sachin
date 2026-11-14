@@ -36,6 +36,52 @@ case'retention':{let rows=val('csv').split('\n').slice(1).map(x=>x.split(',')).f
 case'shorts':{let sentences=val('transcript').split(/[.!?\n]+/).map(x=>x.trim()).filter(x=>x.length>35);s='SHORTS CANDIDATES\n'+sentences.slice(0,5).map((x,i)=>(i+1)+'. '+x.slice(0,170)+'\nOpening line: “Here is the part most people miss…”').join('\n\n')+'\n\nSelect only moments that make sense without missing context.';break}
 case'seo':{let k=val('keyword')||topic;s='DESCRIPTION DRAFT\n'+(topic||'This video')+' — a practical guide for creators who want clear, actionable steps.\n\nIn this video:\n• Understand the basics\n• Follow the steps with examples\n• Avoid common mistakes\n\nSubscribe for more creator tutorials.\n\nTAGS\n'+[k,'YouTube tips','creator tips','Hindi tutorial','YouTube growth'].filter(Boolean).join(', ')+'\n\nTARGET QUERIES\n1. '+k+' for beginners\n2. how to '+k+' step by step\n3. '+k+' Hindi tutorial\n\nEdit this draft to match the actual video; do not add claims the video does not cover.';break}
 case'audit':s='CHANNEL AUDIT\nContext: '+(val('channel')||'Not supplied')+'\nUpload pattern: '+(val('uploads')||'Not supplied')+'\nMain issue: '+(val('problem')||'Not supplied')+'\n\nONE PRIORITY FIX\nFor the next three uploads, keep the audience and promise consistent. Make the first 10–15 seconds directly deliver the title/thumbnail promise, then review impressions, CTR and retention after enough data is available.\n\nThis is a qualitative starting point; connect no account and no analytics were fetched.';break}
+if(current==='script'){
+const voiceStart=s.indexOf('2) FULL HINDI VOICEOVER SCRIPT');
+const visualStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
+if(voiceStart!==-1&&visualStart>voiceStart){
+let voice=s.slice(voiceStart,visualStart);
+const re=/\\[(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2}) \\| ([^\\]]+)\\]/g;
+const matches=[...voice.matchAll(re)];
+const sections=[];
+for(let i=0;i<matches.length;i++){
+const m=matches[i], start=m.index+m[0].length, end=i+1<matches.length?matches[i+1].index:voice.length;
+const body=voice.slice(start,end);
+const words=(body.match(/[\\p{L}\\p{N}]+(?:['’.-][\\p{L}\\p{N}]+)*/gu)||[]).length;
+sections.push({match:m,words});
+}
+const totalWords=sections.reduce((n,x)=>n+x.words,0);
+const wpm=130;
+const totalSeconds=Math.max(1,Math.round(totalWords/wpm*60));
+let elapsed=0, rebuilt='', cursor=0;
+for(const item of sections){
+const m=item.match;
+const startSec=elapsed;
+elapsed+=Math.max(1,Math.round(item.words/wpm*60));
+const endSec=elapsed;
+const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
+rebuilt+=voice.slice(cursor,m.index)+'['+fmt(startSec)+'–'+fmt(endSec)+' | '+m[3]+']';
+cursor=m.index+m[0].length;
+}
+rebuilt+=voice.slice(cursor);
+s=s.slice(0,voiceStart)+rebuilt+s.slice(visualStart);
+const actualMin=(totalSeconds/60).toFixed(1);
+s=s.replace(/Target length: [^\\n]+/,'Requested length: '+duration+'\\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)');
+s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover timestamps are estimated from the actual script word count at '+wpm+' words per minute. Read aloud once and adjust pauses.\\n\\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
+const sceneStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
+const editStart=s.indexOf('4) EDITING, MUSIC & SFX',sceneStart);
+if(sceneStart!==-1&&editStart>sceneStart){
+let scene=s.slice(sceneStart,editStart);
+const scale=totalSeconds/315;
+const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
+scene=scene.replace(/(\\d{1,2}:\\d{2})–(\\d{1,2}:\\d{2})/g,(all,a,b)=>{
+const sec=x=>{const p=x.split(':').map(Number);return p[0]*60+p[1]};
+return fmt(Math.round(sec(a)*scale))+'–'+fmt(Math.round(sec(b)*scale));
+});
+s=s.slice(0,sceneStart)+scene+s.slice(editStart);
+}
+}
+}
 output(s)}
 render();
 </script></body></html>
