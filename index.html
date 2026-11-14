@@ -84,5 +84,6 @@ s=s.slice(0,sceneStart)+scene+s.slice(editStart);
 }
 }
 output(s)}
-render();
+window.onerror=function(message,source,line){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP ERROR: '+message+' | line '+line;v.appendChild(box);}return false;};
+try{render()}catch(e){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP START ERROR: '+(e&&e.stack||e);v.appendChild(box);}}
 </script></body></html>
