@@ -71,12 +71,15 @@ try{
   if(!response.ok)throw new Error(data.error||'AI request failed (HTTP '+response.status+')');
   if(!data.text||!data.text.trim())throw new Error('Gemini returned an empty result.');
   output(data.text.trim());
+  if(runButton){runButton.disabled=false;runButton.textContent='Generate';}
   return;
  }
 }catch(err){
- aiFailure='AI generation could not complete: '+(err?.message||String(err))+'. The result below is the basic local fallback, not the full AI package. Check Settings → Check AI connection, then retry.';
- const resultBox=$('#result');if(resultBox)resultBox.textContent=aiFailure;
- const badge=$('#modeBadge');if(badge)badge.textContent='● Local fallback';
+ const message='AI generation failed: '+(err?.message||String(err))+'. No incomplete fallback was substituted. Open Settings → Check AI connection and retry.';
+ const resultBox=$('#result');if(resultBox)resultBox.textContent=message;
+ const badge=$('#modeBadge');if(badge)badge.textContent='● AI error';
+ if(runButton){runButton.disabled=false;runButton.textContent='Generate';}
+ return;
 }
 const idea=val('idea'),aud=val('aud'),topic=val('topic')||idea||val('niche')||val('channel');
 switch(current){
@@ -100,8 +103,7 @@ case'retention':{let rows=val('csv').split('\n').slice(1).map(x=>x.split(',')).f
 case'shorts':{let sentences=val('transcript').split(/[.!?\n]+/).map(x=>x.trim()).filter(x=>x.length>35);s='SHORTS CANDIDATES\n'+sentences.slice(0,5).map((x,i)=>(i+1)+'. '+x.slice(0,170)+'\nOpening line: “Here is the part most people miss…”').join('\n\n')+'\n\nSelect only moments that make sense without missing context.';break}
 case'seo':{let k=val('keyword')||topic;s='DESCRIPTION DRAFT\n'+(topic||'This video')+' — a practical guide for creators who want clear, actionable steps.\n\nIn this video:\n• Understand the basics\n• Follow the steps with examples\n• Avoid common mistakes\n\nSubscribe for more creator tutorials.\n\nTAGS\n'+[k,'YouTube tips','creator tips','Hindi tutorial','YouTube growth'].filter(Boolean).join(', ')+'\n\nTARGET QUERIES\n1. '+k+' for beginners\n2. how to '+k+' step by step\n3. '+k+' Hindi tutorial\n\nEdit this draft to match the actual video; do not add claims the video does not cover.';break}
 case'audit':s='CHANNEL AUDIT\nContext: '+(val('channel')||'Not supplied')+'\nUpload pattern: '+(val('uploads')||'Not supplied')+'\nMain issue: '+(val('problem')||'Not supplied')+'\n\nONE PRIORITY FIX\nFor the next three uploads, keep the audience and promise consistent. Make the first 10–15 seconds directly deliver the title/thumbnail promise, then review impressions, CTR and retention after enough data is available.\n\nThis is a qualitative starting point; connect no account and no analytics were fetched.';break}
-if(aiFailure)s=aiFailure+'\n\n--- BASIC LOCAL FALLBACK ---\n\n'+s;
-if(runButton){runButton.disabled=false;runButton.textContent='Generate full script';}
+if(runButton){runButton.disabled=false;runButton.textContent='Generate';}
 output(s)}
 window.onerror=function(message,source,line){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP ERROR: '+message+' | line '+line;v.appendChild(box);}return false;};
 window.addEventListener('popstate',function(){if(viewStack.length){current=viewStack.pop()}else{current='dashboard'}nav();render()});try{render()}catch(e){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP START ERROR: '+(e&&e.stack||e);v.appendChild(box);}}
