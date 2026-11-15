@@ -10,10 +10,10 @@ function go(id){if(id===current)return;viewStack.push(current);current=id;try{wi
 function field(label,id,placeholder='',area=false){return '<div class="field"><label>'+label+'</label>'+(area?'<textarea id="'+id+'" placeholder="'+placeholder+'"></textarea>':'<input id="'+id+'" placeholder="'+placeholder+'">')+'</div>'}
 function save(title,out){history.unshift({title,out,date:new Date().toLocaleString()});history=history.slice(0,30);safeSet('sya-history',JSON.stringify(history))}
 function output(s){$('#result').textContent=s;$('#download').disabled=false;save(tools.find(t=>t[0]===current)?.[2]||current,s)}function downloadOutput(){const text=$('#result')?.textContent||'';if(!text||text==='Your result will appear here.')return;const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sachin-youtube-agent-'+current+'.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-function shell(title,desc,form,btn='Generate'){return '<div class="workspace card"><span class="badge">LOCAL TOOL</span><h2>'+title+'</h2><p class="muted">'+desc+'</p>'+form+'<div class="row"><button class="primary" id="run">'+btn+'</button><button class="secondary" id="copy">Copy output</button><button class="secondary" id="download" disabled>Download .txt</button></div><div class="result" id="result">Your result will appear here.</div></div>'}
+function shell(title,desc,form,btn='Generate'){return '<div class="workspace card"><span class="badge">AI CREATOR TOOL</span><h2>'+title+'</h2><p class="muted">'+desc+'</p>'+form+'<div class="row"><button class="primary" id="run">'+btn+'</button><button class="secondary" id="copy">Copy output</button><button class="secondary" id="download" disabled>Download .txt</button></div><div class="result" id="result">Your result will appear here.</div></div>'}
 function render(){let t=tools.find(x=>x[0]===current);$('#heading').textContent=current==='dashboard'?'Your channel, in control.':t[2];$('#sub').textContent=current==='dashboard'?'Eleven focused tools. You stay in control of every upload.':t[3];let v='';
 if(current==='dashboard'){v='<div class="stats"><div class="card stat"><strong>11</strong><span>Creator tools</span></div><div class="card stat"><strong>6</strong><span>Original Python utilities</span></div><div class="card stat"><strong>'+history.length+'</strong><span>Saved sessions</span></div></div>'+(ytChannel?'<div class="section card"><h2>Live YouTube channel</h2><h3>'+escapeHtml(ytChannel.title)+'</h3><div class="stats"><div class="card stat"><strong>'+escapeHtml(ytChannel.subscribers)+'</strong><span>Subscribers</span></div><div class="card stat"><strong>'+escapeHtml(ytChannel.views)+'</strong><span>Total views</span></div><div class="card stat"><strong>'+escapeHtml(ytChannel.videos)+'</strong><span>Videos</span></div></div><p class="muted">Connected channel · Read-only data</p><button data-id="settings">Open YouTube analytics →</button></div>':'<div class="section card"><h3>Connect your YouTube channel</h3><p>Connect Google in Settings to show live channel stats here.</p><button data-id="settings">Connect YouTube →</button></div>')+'<div class="section"><h2>Choose your next move</h2><div class="grid">'+tools.slice(1,14).map(x=>'<div class="card"><div class="ico">'+x[1]+'</div><h3>'+x[2]+'</h3><p>'+x[3]+'</p><button data-id="'+x[0]+'">Open tool →</button></div>').join('')+'</div></div><div class="section card"><h3>Built around the source skill pack</h3><p>Drafts and analysis only. Nothing is published automatically. Hook scoring is heuristic, not a prediction. Viral research requires data you supply; no missing metrics are invented.</p></div>'}
-else if(current==='script')v=shell('Hindi Script & Hook Studio','Build a complete voiceover package with scenes, SEO, thumbnail and a Shorts cut.',field('Video idea / topic','idea','e.g. YouTube par 1000 subscribers kaise badhayein',true)+field('Target audience','aud','e.g. Hindi beginner creators')+field('Video length','duration','5 minutes')+field('Your channel / CTA (optional)','channelCTA','e.g. Sachin Growth Lab — subscribe for creator tips')+'<div class="muted" style="font-size:12px;margin:8px 0">Local generator works without an API key. AI mode can be connected later using a secure Netlify environment variable.</div>','Generate full script');
+else if(current==='script')v=shell('Hindi Script & Hook Studio','Build a complete voiceover package with scenes, SEO, thumbnail and a Shorts cut.',field('Video idea / topic','idea','e.g. YouTube par 1000 subscribers kaise badhayein',true)+field('Target audience','aud','e.g. Hindi beginner creators')+field('Video length','duration','5 minutes')+field('Your channel / CTA (optional)','channelCTA','e.g. Sachin Growth Lab — subscribe for creator tips')+'<div class="muted" style="font-size:12px;margin:8px 0">Gemini AI creates the full script and scene prompts. If AI is unavailable, a clearly labelled basic local fallback is shown.</div>','Generate full script');
 else if(current==='package')v=shell('Title + Thumbnail Pairing','Check the title and thumbnail together for repetition, vagueness and length.',field('Video title','title','Your proposed title')+field('Thumbnail text','thumb','2–5 words'));
 else if(current==='edit')v=shell('Transcript Edit Assistant','Paste SRT subtitles. Identify long gaps, filler words and possible edit points.',field('SRT transcript','srt','Paste .srt content here',true));
 else if(current==='comment')v=shell('Comment Triage','Paste comments one per line to group them and draft response ideas.',field('Comments','comments','Paste viewer comments, one per line',true));
@@ -25,7 +25,7 @@ else if(current==='seo')v=shell('YouTube SEO Studio','Create a useful descriptio
 else if(current==='chapters')v=shell('Chapter Builder','Paste SRT subtitles. Chapters start at 00:00 and should be in ascending order.',field('SRT transcript','chapterSrt','Paste SRT here',true));
 else if(current==='audit')v=shell('Channel Audit','Enter what you know. The result will prioritize one fix rather than invent analytics.',field('Channel niche and audience','channel','Describe your channel',true)+field('Current upload pattern','uploads','e.g. 2 Shorts/week')+field('Main problem','problem','e.g. low impressions'));
 else if(current==='history')v='<div class="card"><h2>Recent sessions</h2><div class="history">'+(history.length?history.map(x=>'<div><b>'+x.title+'</b><br><small>'+x.date+'</small><p>'+x.out.slice(0,150)+'</p></div>').join(''):'No saved sessions yet.')+'</div></div>';
-else if(current==='settings')v='<div class="workspace"><div class="card"><h2>AI provider connection</h2><p class="muted">Connect Gemini AI securely through Cloudflare Pages. Your API key stays on the server and is never placed in this GitHub code.</p><p id="aiStatus" class="muted">Checking secure AI endpoint…</p><ol class="muted"><li>Create a Gemini API key in Google AI Studio.</li><li>In Cloudflare → Workers & Pages → sachin-youtube-agent → Settings → Variables and Secrets, add a secret named <b>GEMINI_API_KEY</b>.</li><li>Paste the key as the secret value, save, then redeploy the latest commit.</li></ol><button class="secondary" id="checkAi">Check AI connection</button></div><div class="card" style="margin-top:14px"><h2>Preferences</h2><div class="field"><label>Language</label><select id="language"><option '+(lang==='English'?'selected':'')+'>English</option><option '+(lang==='हिन्दी'?'selected':'')+'>हिन्दी</option></select></div><button class="primary" id="saveSettings">Save preferences</button></div><div class="card" style="margin-top:14px"><h2>YouTube account connection</h2><p class="muted">Connect securely with Google OAuth. This app requests read-only access to your YouTube channel and Analytics. It cannot upload, edit or delete videos.</p><p id="ytStatus" class="muted">'+(ytChannel?'Connected: '+escapeHtml(ytChannel.title):'Not connected in this browser session.')+'</p><div class="row"><button class="primary" id="connectYouTube">Connect Google / YouTube</button><button class="secondary" id="disconnectYouTube" '+(ytAccessToken?'':'disabled')+'>Disconnect</button><button class="secondary" id="loadAnalytics" '+(ytAccessToken?'':'disabled')+'>Load last 28 days analytics</button></div><div id="ytDetails" class="result">'+(ytChannel?escapeHtml(ytChannel.title)+' · '+escapeHtml(ytChannel.subscribers)+' subscribers':'After connecting, your channel details and analytics will appear here.')+'</div><div id="ytAnalytics" class="result" style="display:none"></div></div><div class="card" style="margin-top:14px"><h3>Privacy & app limits</h3><p class="muted">Access tokens stay in memory and are not saved to browser storage. Reconnect after refreshing the page. Analytics access is read-only. Gemini AI requests are processed securely through the Cloudflare Pages Function.</p></div></div>';
+else if(current==='settings')v='<div class="workspace"><div class="card"><h2>AI provider connection</h2><p class="muted">Gemini AI is connected through a secure Cloudflare Pages Function. Your API key stays on the server and is never placed in this GitHub code.</p><p id="aiStatus" class="muted">Checking secure AI endpoint…</p><ol class="muted"><li>Create a Gemini API key in Google AI Studio.</li><li>In Cloudflare → Workers & Pages → sachin-youtube-agent → Settings → Variables and Secrets, add a secret named <b>GEMINI_API_KEY</b>.</li><li>Paste the key as the secret value, save, then redeploy the latest commit.</li></ol><button class="secondary" id="checkAi">Check AI connection</button></div><div class="card" style="margin-top:14px"><h2>Preferences</h2><div class="field"><label>Language</label><select id="language"><option '+(lang==='English'?'selected':'')+'>English</option><option '+(lang==='हिन्दी'?'selected':'')+'>हिन्दी</option></select></div><button class="primary" id="saveSettings">Save preferences</button></div><div class="card" style="margin-top:14px"><h2>YouTube account connection</h2><p class="muted">Connect securely with Google OAuth. This app requests read-only access to your YouTube channel and Analytics. It cannot upload, edit or delete videos.</p><p id="ytStatus" class="muted">'+(ytChannel?'Connected: '+escapeHtml(ytChannel.title):'Not connected in this browser session.')+'</p><div class="row"><button class="primary" id="connectYouTube">Connect Google / YouTube</button><button class="secondary" id="disconnectYouTube" '+(ytAccessToken?'':'disabled')+'>Disconnect</button><button class="secondary" id="loadAnalytics" '+(ytAccessToken?'':'disabled')+'>Load last 28 days analytics</button></div><div id="ytDetails" class="result">'+(ytChannel?escapeHtml(ytChannel.title)+' · '+escapeHtml(ytChannel.subscribers)+' subscribers':'After connecting, your channel details and analytics will appear here.')+'</div><div id="ytAnalytics" class="result" style="display:none"></div></div><div class="card" style="margin-top:14px"><h3>Privacy & app limits</h3><p class="muted">Access tokens stay in memory and are not saved to browser storage. Reconnect after refreshing the page. Analytics access is read-only. Gemini AI requests are processed securely through the Cloudflare Pages Function.</p></div></div>';
 $('#view').innerHTML=v;nav();checkAiStatus();if($('#backBtn'))$('#backBtn').onclick=goBack;if($('#settingsBtn'))$('#settingsBtn').onclick=()=>go('settings');if($('#run')){$('#run').onclick=runTool;$('#copy').onclick=()=>navigator.clipboard?.writeText($('#result').textContent);$('#download').onclick=downloadOutput}if($('#checkAi'))$('#checkAi').onclick=checkAiStatus;if($('#saveSettings'))$('#saveSettings').onclick=()=>{lang=$('#language').value;safeSet('sya-lang',lang);alert('Preferences saved')};if($('#connectYouTube'))$('#connectYouTube').onclick=connectYouTube;if($('#disconnectYouTube'))$('#disconnectYouTube').onclick=disconnectYouTube;if($('#loadAnalytics'))$('#loadAnalytics').onclick=loadYouTubeAnalytics;document.querySelectorAll('#view [data-id]').forEach(b=>b.onclick=()=>go(b.dataset.id))}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function setYouTubeMessage(message,isError=false){const el=$('#ytStatus');if(el){el.textContent=message;el.style.color=isError?'#ff9b9b':'#63d9e8'}}
@@ -35,7 +35,51 @@ async function connectYouTube(){try{setYouTubeMessage('Loading secure Google sig
 async function fetchYouTubeChannel(){try{const res=await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true',{headers:{Authorization:'Bearer '+ytAccessToken}});const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'YouTube channel request failed');if(!data.items?.length)throw new Error('No YouTube channel was found on this Google account');const x=data.items[0];ytChannel={title:x.snippet.title,subscribers:x.statistics.hiddenSubscriberCount?'Hidden':Number(x.statistics.subscriberCount||0).toLocaleString(),views:Number(x.statistics.viewCount||0).toLocaleString(),videos:Number(x.statistics.videoCount||0).toLocaleString(),id:x.id};render();setYouTubeMessage('Connected to '+ytChannel.title)}catch(e){setYouTubeMessage(e.message||String(e),true)}}
 async function loadYouTubeAnalytics(){if(!ytAccessToken){setYouTubeMessage('Connect your Google account first.',true);return}const box=$('#ytAnalytics');if(box){box.style.display='block';box.textContent='Loading YouTube Analytics…'}try{const end=new Date();end.setDate(end.getDate()-2);const start=new Date(end);start.setDate(start.getDate()-27);const fmt=d=>d.toISOString().slice(0,10);const url='https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==MINE&startDate='+fmt(start)+'&endDate='+fmt(end)+'&metrics=views,estimatedMinutesWatched,subscribersGained';const res=await fetch(url,{headers:{Authorization:'Bearer '+ytAccessToken}});const data=await res.json();if(!res.ok)throw new Error(data.error?.message||'Analytics request failed. Check that YouTube Analytics API is enabled.');const values=data.rows?.[0]||[0,0,0];if(box)box.textContent='LAST 28 DAYS (through '+fmt(end)+')\nViews: '+Number(values[0]||0).toLocaleString()+'\nEstimated minutes watched: '+Number(values[1]||0).toLocaleString()+'\nSubscribers gained: '+Number(values[2]||0).toLocaleString()+'\n\nSource: YouTube Analytics API';}catch(e){if(box)box.textContent='Analytics could not load: '+(e.message||String(e))+'\\nMake sure YouTube Analytics API is enabled in Google Cloud and the account has a channel.';setYouTubeMessage('Channel connected; analytics request needs attention.',true)}}
 function disconnectYouTube(){if(ytAccessToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(ytAccessToken,()=>{});ytAccessToken=null;ytChannel=null;googleTokenClient=null;render()}
-function val(id){return ($('#'+id)?.value||'').trim()}async function runTool(){let s='';const mode=$('#modeBadge')?.textContent||'';if(mode.includes('AI mode ready')){const toolName=tools.find(t=>t[0]===current)?.[2]||current;const inputs={};document.querySelectorAll('#view input,#view textarea,#view select').forEach(el=>{if(el.id)inputs[el.id]=el.value;});const qualityRules=current==='script'?'\nSCRIPT PACKAGE RULES (MANDATORY): Create a genuinely record-ready Hindi/Hinglish video package. For a requested 5-minute video, write 600–700 spoken words (target about 650; do not count headings, timestamps, SEO, or visual notes). Never claim a 5-minute duration for a shorter script. Add timestamps that cover the full requested duration continuously and end exactly at 5:00 for a 5-minute request. Give a natural voiceover with examples, transitions, useful detail and a strong CTA; avoid padding and repeated points. Include: 5 distinct hooks; full voiceover divided into timed sections; a scene-by-scene visual plan matching every timestamp; for EVERY scene provide a ready-to-paste AI video prompt describing subject, action, setting, camera movement, lighting, visual style, composition and on-screen text; maintain consistent characters/style across scenes where relevant; specify aspect ratio and approximate clip length; distinguish illustrative/demo analytics from real data. Then include editing instructions, title, description, keywords, hashtags, 3 thumbnail text options with one recommended choice, and a 30–40 second Shorts script. At the end give an honest spoken-word count and estimated duration using 125–135 words per minute. If the word count is below target, expand the script before answering.\n':'\nGENERAL QUALITY RULES: Deliver a complete, directly usable result for the selected creator tool. Follow every supplied field, use clear Hindi/Hinglish unless another language is requested, provide concrete examples and step-by-step actions, and format the result with clear headings. Do not give generic filler, repeat points, invent channel analytics or claim guaranteed growth. Include copy-ready text wherever useful.\n';const prompt='You are the senior creator strategist and production assistant for Sachin Growth Lab. Create the highest-quality, practical, original deliverable for this tool: '+toolName+'. Respond in the language implied by the inputs (default Hindi/Hinglish). Be accurate, specific and beginner-friendly. Never fabricate analytics, results, citations or guarantees.'+qualityRules+'User inputs: '+JSON.stringify(inputs);const resultBox=$('#result');if(resultBox)resultBox.textContent='Generating with Gemini AI…';try{const response=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});const data=await response.json();if(!response.ok)throw new Error(data.error||'AI request failed');const aiText=data.text||'AI returned an empty response.';output(aiText);return;}catch(err){if(resultBox)resultBox.textContent='AI request failed: '+(err.message||String(err))+'\nSwitching to local fallback…';if(mode.includes('AI mode ready')){const badge=$('#modeBadge');if(badge)badge.textContent='● Local fallback';}}}const idea=val('idea'),aud=val('aud'),topic=val('topic')||idea||val('niche')||val('channel');switch(current){
+function val(id){return ($('#'+id)?.value||'').trim()}
+async function runTool(){
+let s='',aiFailure='';
+const mode=$('#modeBadge')?.textContent||'';
+const runButton=$('#run');
+if(runButton){runButton.disabled=true;runButton.textContent='Generating…'}
+try{
+ if(mode.includes('AI mode ready')){
+  const toolName=tools.find(t=>t[0]===current)?.[2]||current;
+  const inputs={};
+  document.querySelectorAll('#view input,#view textarea,#view select').forEach(el=>{if(el.id)inputs[el.id]=el.value;});
+  const duration=String(inputs.duration||'5 minutes');
+  const durationMatch=duration.match(/\d+(?:\.\d+)?/);
+  const minutes=durationMatch?Math.max(1,Math.min(30,Number(durationMatch[0]))):5;
+  const targetLow=Math.round(minutes*125),targetHigh=Math.round(minutes*135),targetMid=Math.round(minutes*130);
+  const instructions={
+   script:'Create a complete, record-ready Hindi/Hinglish YouTube video package. VOICEOVER LENGTH IS CRITICAL: requested duration '+duration+'. Write '+targetLow+'–'+targetHigh+' spoken words (aim '+targetMid+'), excluding headings, timestamps, hooks, scene directions, SEO and CTA labels. Do not pad or repeat. Count the spoken words before finalizing and print the actual count. Divide the voiceover into timed sections whose first timestamp is 0:00 and whose final timestamp ends exactly at the requested duration ('+minutes+':00 for whole-minute requests). Timings must be continuous with no gaps or overlaps and must match the spoken word count at a natural 125–135 Hindi words/minute pace. Include 5 distinct hooks; one selected hook; full voiceover with practical examples and transitions; then 8–12 scene breakdowns aligned to the voiceover, each with time range, what viewers see, on-screen caption, editing cue, and a separate ready-to-paste video-generation prompt. Each video prompt must state 16:9, clip length, subject/action, environment, camera framing/movement, lighting, style, continuity instructions, and avoid generated text/logos/watermarks (add captions later in editing). If a scene needs a real app screen, instruct the creator to use a real screen recording, not a fabricated UI. Then include editing/audio guidance, 3 title options and best pick, description, keywords/tags, hashtags, 3 thumbnail concepts and recommended choice, and a 30–40 second standalone Shorts script. Do not claim guaranteed subscribers or fabricate analytics.',
+   package:'Review the supplied YouTube title and thumbnail as one click package. Give a verdict, audience promise, mismatch/repetition risks, mobile readability check, 5 improved title options, 3 thumbnail text/visual concepts, and one recommended title-thumbnail pairing. Keep claims truthful and specific.',
+   edit:'Analyze the supplied SRT transcript. Return timestamped edit decisions, remove/reduce filler and repetition without changing meaning, identify dead air only when supported by timestamps, propose b-roll and on-screen captions, preserve speaker intent, and finish with a concise editor handoff. Do not invent timestamps absent from the SRT.',
+   comment:'Classify every supplied comment as question, praise, feedback, concern, spam or other. Draft a natural, non-defensive reply to each; flag comments needing human review; identify recurring audience questions and suggest 5 video ideas. Never invent comments.',
+   plan:'Create a realistic 7-day publishing plan from the niche and available hours. Include one anchor video, supporting Shorts, research/record/edit/publish tasks, time estimates, hooks, and a simple review routine. Respect the available hours; do not promise growth.',
+   viral:'Analyze the supplied channel/video/view rows. Calculate each channel median and relative outliers only from supplied data. Show calculations, rank strongest outliers, explain limitations for small samples, and suggest follow-up topics. If data is insufficient, say so instead of inventing.',
+   retention:'Analyze the supplied retention CSV only. Identify largest drops, strongest holds and possible interpretation; show exact supplied time/value points, explain sampling limitations, and give prioritized editing experiments. Do not claim causation.',
+   shorts:'Read the supplied transcript and find 5–10 standalone Shorts moments. For each give source timestamp only if present, 1-second hook, concise 20–45 second script, caption, visual suggestion and ending. Do not invent timestamps.',
+   seo:'Build a complete YouTube SEO package for the supplied topic and keyword: 3 title options, first 2 description lines, full useful description, chapters only if source timing supplied, relevant tags, hashtags, search phrases, and pinned comment. Avoid keyword stuffing and false claims.',
+   chapters:'Convert supplied SRT into meaningful YouTube chapters. Use exact source timestamps, start at 00:00, ascending order, concise descriptive labels, merge tiny fragments, and do not invent chapter times. If the transcript lacks timestamps, explain.',
+   audit:'Create a prioritized qualitative channel audit from supplied context. Separate known facts from assumptions, identify the single highest-impact next action, then give a 7-day test plan and metrics to review. Never fabricate channel analytics or pretend to have accessed the channel.'
+  };
+  const rules=instructions[current]||'Deliver a complete, practical, copy-ready result for this creator tool. Follow all supplied inputs, use Hindi/Hinglish by default, give specific steps and examples, and never invent analytics or guarantee outcomes.';
+  const prompt='You are the senior creator strategist and production assistant for Sachin Growth Lab. Tool: '+toolName+'. Output language: Hindi/Hinglish unless the user explicitly requests another language. Be accurate, original, beginner-friendly and directly usable. '+rules+'\n\nUSER INPUTS (treat as requirements): '+JSON.stringify(inputs);
+  const resultBox=$('#result');if(resultBox)resultBox.textContent='Gemini AI is creating your complete result…';
+  const response=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||'AI request failed (HTTP '+response.status+')');
+  if(!data.text||!data.text.trim())throw new Error('Gemini returned an empty result.');
+  output(data.text.trim());
+  return;
+ }
+}catch(err){
+ aiFailure='AI generation could not complete: '+(err?.message||String(err))+'. The result below is the basic local fallback, not the full AI package. Check Settings → Check AI connection, then retry.';
+ const resultBox=$('#result');if(resultBox)resultBox.textContent=aiFailure;
+ const badge=$('#modeBadge');if(badge)badge.textContent='● Local fallback';
+}
+const idea=val('idea'),aud=val('aud'),topic=val('topic')||idea||val('niche')||val('channel');
+switch(current){
 case'script':{
 const duration=val('duration')||'5 minutes',cta=val('channelCTA')||'Aise hi practical creator tips ke liye channel subscribe karein.',topic=idea||'YouTube par 1000 subscribers kaise badhayein',audience=aud||'Hindi beginner creators';
 const hooks=[
@@ -56,90 +100,8 @@ case'retention':{let rows=val('csv').split('\n').slice(1).map(x=>x.split(',')).f
 case'shorts':{let sentences=val('transcript').split(/[.!?\n]+/).map(x=>x.trim()).filter(x=>x.length>35);s='SHORTS CANDIDATES\n'+sentences.slice(0,5).map((x,i)=>(i+1)+'. '+x.slice(0,170)+'\nOpening line: “Here is the part most people miss…”').join('\n\n')+'\n\nSelect only moments that make sense without missing context.';break}
 case'seo':{let k=val('keyword')||topic;s='DESCRIPTION DRAFT\n'+(topic||'This video')+' — a practical guide for creators who want clear, actionable steps.\n\nIn this video:\n• Understand the basics\n• Follow the steps with examples\n• Avoid common mistakes\n\nSubscribe for more creator tutorials.\n\nTAGS\n'+[k,'YouTube tips','creator tips','Hindi tutorial','YouTube growth'].filter(Boolean).join(', ')+'\n\nTARGET QUERIES\n1. '+k+' for beginners\n2. how to '+k+' step by step\n3. '+k+' Hindi tutorial\n\nEdit this draft to match the actual video; do not add claims the video does not cover.';break}
 case'audit':s='CHANNEL AUDIT\nContext: '+(val('channel')||'Not supplied')+'\nUpload pattern: '+(val('uploads')||'Not supplied')+'\nMain issue: '+(val('problem')||'Not supplied')+'\n\nONE PRIORITY FIX\nFor the next three uploads, keep the audience and promise consistent. Make the first 10–15 seconds directly deliver the title/thumbnail promise, then review impressions, CTR and retention after enough data is available.\n\nThis is a qualitative starting point; connect no account and no analytics were fetched.';break}
-if(current==='script'){
-const voiceStart=s.indexOf('2) FULL HINDI VOICEOVER SCRIPT');
-const visualStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
-if(voiceStart!==-1&&visualStart>voiceStart){
-let voice=s.slice(voiceStart,visualStart);
-const requestedDuration=val('duration')||'5 minutes';
-const durationMatch=requestedDuration.match(/\d+(?:\.\d+)?/);
-const targetMinutes=durationMatch?Math.max(1,Math.min(60,Number(durationMatch[0]))):5;
-const wpm=130;
-const targetWords=Math.round(targetMinutes*wpm);
-const re=/\[(\d{1,2}:\d{2})–(\d{1,2}:\d{2}) \| ([^\]]+)\]/g;
-const matches=[...voice.matchAll(re)];
-const sections=[];
-for(let i=0;i<matches.length;i++){
-const m=matches[i],bodyStart=m.index+m[0].length,bodyEnd=i+1<matches.length?matches[i+1].index:voice.length;
-const body=voice.slice(bodyStart,bodyEnd).trim();
-const words=(body.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length;
-sections.push({match:m,body,words});
-}
-const totalBefore=sections.reduce((n,x)=>n+x.words,0);
-const ratio=Math.min(1,targetWords/Math.max(1,totalBefore));
-function countWords(t){return (t.match(/[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*/gu)||[]).length}
-function fitWords(text,budget){
-if(countWords(text)<=budget)return text;
-const sentences=text.match(/[^.!?।]+[.!?।]?/gu)||[text];
-const kept=[];let used=0;
-for(const sentence of sentences){
-const n=countWords(sentence);
-if(used+n>budget)break;
-kept.push(sentence.trim());used+=n;
-}
-if(kept.length)return kept.join(' ');
-const tokens=text.match(/\S+/g)||[];
-return tokens.slice(0,budget).join(' ').replace(/[,:;—-]+$/,'')+'…';
-}
-let cursor=0,rebuilt='',elapsed=0;
-const fmt=n=>Math.floor(n/60)+':'+String(n%60).padStart(2,'0');
-for(let i=0;i<sections.length;i++){
-const item=sections[i],m=item.match;
-const budget=i===sections.length-1?Math.max(1,targetWords-sections.slice(0,-1).reduce((n,x)=>n+x.finalWords,0)):Math.max(1,Math.floor(item.words*ratio));
-const body=fitWords(item.body,budget);
-const words=countWords(body);
-item.finalWords=words;
-const startSec=elapsed;
-elapsed+=Math.max(1,Math.round(words/wpm*60));
-rebuilt+=voice.slice(cursor,m.index)+'['+fmt(startSec)+'–'+fmt(elapsed)+' | '+m[3]+']\n'+body+'\n\n';
-cursor=m.index+m[0].length+(item.body.length);
-}
-if(sections.length){
-const last=sections[sections.length-1];
-const finalEnd=voice.indexOf(last.body,sections[sections.length-1].match.index);
-if(finalEnd>=0){
-const originalPrefix=voice.slice(0,sections[0].match.index);
-rebuilt=originalPrefix;
-elapsed=0;
-for(let i=0;i<sections.length;i++){
-const item=sections[i],startSec=elapsed;
-elapsed+=Math.max(1,Math.round(item.finalWords/wpm*60));
-rebuilt+='['+fmt(startSec)+'–'+fmt(elapsed)+' | '+item.match[3]+']\n'+fitWords(item.body,item.finalWords)+'\n\n';
-}
-}
-}
-const totalWords=sections.reduce((n,x)=>n+x.finalWords,0);
-const totalSeconds=Math.max(1,Math.round(totalWords/wpm*60));
-s=s.slice(0,voiceStart)+rebuilt+'\n'+s.slice(visualStart);
-const actualMin=(totalSeconds/60).toFixed(1);
-s=s.replace(/Target length: [^\n]+/,'Requested length: '+requestedDuration+'\nEstimated voiceover: '+actualMin+' minutes ('+totalWords+' words at '+wpm+' words/min)'+(Math.abs(Number(actualMin)-targetMinutes)>0.3?'\nLENGTH NOTE: Read aloud and adjust pauses; this is an estimated duration.':''));
-s=s.replace('3) DETAILED SCENE-BY-SCENE VISUAL PLAN','TIMING CHECK: Voiceover is sized to the requested word budget at '+wpm+' words per minute. Read aloud once and adjust pauses.\n\n3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
-const sceneStart=s.indexOf('3) DETAILED SCENE-BY-SCENE VISUAL PLAN');
-const editStart=s.indexOf('4) EDITING, MUSIC & SFX',sceneStart);
-if(sceneStart!==-1&&editStart>sceneStart){
-let scene=s.slice(sceneStart,editStart);
-const voiceRanges=[...rebuilt.matchAll(/\[(\d{1,2}:\d{2})–(\d{1,2}:\d{2}) \| ([^\]]+)\]/g)].map(m=>({start:m[1],end:m[2]}));
-const sceneTimeMatches=[...scene.matchAll(/\d{1,2}:\d{2}–\d{1,2}:\d{2}/g)];
-let sceneIndex=0;
-scene=scene.replace(/\d{1,2}:\d{2}–\d{1,2}:\d{2}/g,()=>{
-const range=voiceRanges[Math.min(sceneIndex,voiceRanges.length-1)];
-sceneIndex++;
-return range?range.start+'–'+range.end:'';
-});
-s=s.slice(0,sceneStart)+scene+s.slice(editStart);
-}
-}
-}
+if(aiFailure)s=aiFailure+'\n\n--- BASIC LOCAL FALLBACK ---\n\n'+s;
+if(runButton){runButton.disabled=false;runButton.textContent='Generate full script';}
 output(s)}
 window.onerror=function(message,source,line){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP ERROR: '+message+' | line '+line;v.appendChild(box);}return false;};
 window.addEventListener('popstate',function(){if(viewStack.length){current=viewStack.pop()}else{current='dashboard'}nav();render()});try{render()}catch(e){const v=document.getElementById('view');if(v){v.innerHTML='';const box=document.createElement('pre');box.style.cssText='white-space:pre-wrap;background:#3b1018;color:#fff;padding:18px;border-radius:12px;margin:20px';box.textContent='APP START ERROR: '+(e&&e.stack||e);v.appendChild(box);}}
