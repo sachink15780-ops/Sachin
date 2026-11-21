@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: clipforge-ai
+    runtime: docker
+    plan: free
+    rootDir: clipforge/backend
+    dockerfilePath: clipforge/backend/Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PYTHONUNBUFFERED
+        value: "1"
