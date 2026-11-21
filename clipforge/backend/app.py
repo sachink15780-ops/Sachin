@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from pathlib import Path
-import uuid, subprocess, shutil, json, os, re, threading
+import uuid, subprocess, shutil, json, os, re, threading, zipfile
 
 ROOT=Path(__file__).resolve().parent
 DATA=ROOT/'data'; DATA.mkdir(exist_ok=True)
@@ -16,7 +16,7 @@ def home():
 def job_status(job_id:str):
     if job_id not in JOBS: raise HTTPException(404,'Job not found')
     return JOBS[job_id]
-@app.get('/api/jobs/{job_id}/clips')
+@app.get('/api/jobs/{job_id}/zip')\ndef download_zip(job_id:str):\n    if job_id not in JOBS or JOBS[job_id].get('status')!='done': raise HTTPException(404,'Clips not ready')\n    clips_dir=DATA/job_id/'clips'; zip_path=DATA/job_id/'clips.zip'\n    with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as z:\n        for clip in clips_dir.glob('clip_*.mp4'): z.write(clip,arcname=clip.name)\n    return FileResponse(zip_path,media_type='application/zip',filename='ClipForge-'+job_id+'.zip')\n\n@app.get('/api/jobs/{job_id}/clips')
 def job_clips(job_id:str):
     if job_id not in JOBS: raise HTTPException(404,'Job not found')
     return JOBS[job_id].get('clips',[])
