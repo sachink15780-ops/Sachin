@@ -51,7 +51,7 @@ def start_job(source:Path,job_id:str,count:int,clip_len:int):
             score=min(99,35+words*3+min(20,len(s['text'])//8))
             candidates.append((score,a,b,s['text']))
         if not candidates:
-            candidates=[(50,min(duration-clip_len,i*duration/max(1,count)),min(duration,min(duration-clip_len,i*duration/max(1,count))+clip_len),'') for i in range(count)]
+            candidates=[(50,max(0,min(duration-clip_len,i*duration/max(1,count))),min(duration,max(0,min(duration-clip_len,i*duration/max(1,count)))+clip_len),'') for i in range(count)]
         candidates.sort(key=lambda x:x[0],reverse=True)
         picked=[]
         for c in candidates:
