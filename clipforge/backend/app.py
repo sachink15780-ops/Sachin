@@ -85,7 +85,7 @@ async def upload(background:BackgroundTasks,file:UploadFile=File(...),count:int=
     return {'job_id':jid}
 @app.post('/api/process/url')
 def process_url(background:BackgroundTasks,url:str=Form(...),count:int=Form(10),clip_len:int=Form(30)):
-    if not re.match(r'^https?://(www\.)?(youtube.com|youtu.be)/',url): raise HTTPException(400,'Only YouTube links are supported')
+    if not re.match(r'^https?://(www\.)?(youtube\\.com|youtu\\.be)/',url): raise HTTPException(400,'Only YouTube links are supported')
     jid=uuid.uuid4().hex[:12]; d=DATA/jid; d.mkdir(parents=True,exist_ok=True); p=d/'source.mp4'
     JOBS[jid]={'id':jid,'status':'queued','progress':0,'message':'Downloading video…','clips':[]}
     def download_then_process():
