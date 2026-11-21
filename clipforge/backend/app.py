@@ -47,7 +47,7 @@ def start_job(source:Path,job_id:str,count:int,clip_len:int):
         candidates=[]
         for s in segs:
             a=max(0,s['start']-clip_len*0.35); b=min(duration,a+clip_len)
-            words=len(re.findall(r'\\w+',s['text']))
+            words=len(re.findall(r'\w+',s['text']))
             score=min(99,35+words*3+min(20,len(s['text'])//8))
             candidates.append((score,a,b,s['text']))
         if not candidates:
@@ -85,7 +85,7 @@ async def upload(background:BackgroundTasks,file:UploadFile=File(...),count:int=
     return {'job_id':jid}
 @app.post('/api/process/url')
 def process_url(background:BackgroundTasks,url:str=Form(...),count:int=Form(10),clip_len:int=Form(30)):
-    if not re.match(r'^https?://(www\\.)?(youtube\\.com|youtu\\.be)/',url): raise HTTPException(400,'Only YouTube links are supported')
+    if not re.match(r'^https?://(www\.)?(youtube.com|youtu.be)/',url): raise HTTPException(400,'Only YouTube links are supported')
     jid=uuid.uuid4().hex[:12]; d=DATA/jid; d.mkdir(parents=True,exist_ok=True); p=d/'source.mp4'
     JOBS[jid]={'id':jid,'status':'queued','progress':0,'message':'Downloading video…','clips':[]}
     def download_then_process():
