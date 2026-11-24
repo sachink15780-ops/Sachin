@@ -207,3 +207,20 @@ begin
  insert into public.transactions(user_id,kind,amount,reference_id,note) values(uid,'withdrawal',-p_amount,wid,'Withdrawal request reserved');
  return wid;
 end; $$;
+
+-- Storage bucket and private upload policies for screenshots.
+insert into storage.buckets (id,name,public) values ('task-proofs','task-proofs',false)
+on conflict (id) do update set public=false;
+drop policy if exists "user uploads own proof files" on storage.objects;
+create policy "user uploads own proof files" on storage.objects
+for insert to authenticated with check (
+ bucket_id='task-proofs' and (storage.foldername(name))[1]=auth.uid()::text
+);
+drop policy if exists "proof owner or admin can read" on storage.objects;
+create policy "proof owner or admin can read" on storage.objects
+for select to authenticated using (
+ bucket_id='task-proofs' and ((storage.foldername(name))[1]=auth.uid()::text or public.is_admin())
+);
+-- Restrict profile update to non-privileged columns (role cannot be self-edited).
+revoke update on public.profiles from authenticated;
+grant update (display_name, phone) on public.profiles to authenticated;
