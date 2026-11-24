@@ -185,3 +185,25 @@ begin
   end if;
 end;
 $$;
+
+-- Users may update only safe profile fields; role must be managed by trusted admin SQL.
+drop policy if exists "profile update own" on public.profiles;
+create policy "profile update own safe fields" on public.profiles
+for update using (id = auth.uid()) with check (id = auth.uid());
+
+-- Withdrawal RPC: checks balance and reserves requested amount.
+create or replace function public.request_withdrawal(p_amount numeric, p_upi_id text)
+returns uuid language plpgsql security definer set search_path = public
+as $$
+declare uid uuid := auth.uid(); bal numeric; wid uuid;
+begin
+ if uid is null then raise exception 'login required'; end if;
+ if p_amount < 100 then raise exception 'minimum withdrawal is 100'; end if;
+ if p_upi_id is null or length(trim(p_upi_id)) < 5 then raise exception 'invalid UPI ID'; end if;
+ select balance into bal from public.wallets where user_id=uid for update;
+ if bal is null or bal < p_amount then raise exception 'insufficient balance'; end if;
+ update public.wallets set balance=balance-p_amount,updated_at=now() where user_id=uid;
+ insert into public.withdrawals(user_id,amount,upi_id,status) values(uid,p_amount,trim(p_upi_id),'pending') returning id into wid;
+ insert into public.transactions(user_id,kind,amount,reference_id,note) values(uid,'withdrawal',-p_amount,wid,'Withdrawal request reserved');
+ return wid;
+end; $$;
